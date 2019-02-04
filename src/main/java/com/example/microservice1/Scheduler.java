@@ -10,7 +10,7 @@ public class Scheduler {
     @Value("${test.value}")
     private String testValue;
 
-    @Scheduled(fixedRate = 10000)
+    //@Scheduled(fixedRate = 10000)
     public void testConfig() {
         System.out.println(testValue);
     }
