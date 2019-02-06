@@ -11,6 +11,4 @@ public interface FeignFilesSrvice {
     @GetMapping("/prop")
     String getMS2Prop();
 
-//    @GetMapping("/unindexed")
-//    get
 }

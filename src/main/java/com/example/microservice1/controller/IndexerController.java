@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.TreeSet;
 
@@ -41,15 +43,32 @@ public class IndexerController {
         return HttpStatus.OK;
     }
 
+    @PostMapping(value = "/indexFile", consumes = {"multipart/form-data"})
+    public HttpStatus indexMultipartContent(@RequestParam("file") MultipartFile file, @RequestParam("id") long id) {
+        String text = null;
+        try {
+            text = new String(file.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        text = text.replaceAll("[^A-Za-z0-9 ]", " ");
+        text = text.toLowerCase();
+        if (text.startsWith(UTF8_BOM)) {
+            text = text.substring(1);
+        }
+        for (String word : text.split(" ")) {
+            addIndex(word, id);
+        }
+        return HttpStatus.OK;
+    }
+
     private void addIndex(String word, long id) {
         Optional<IndexEntry> optional = repository.findById(word);
         if (optional.isPresent()) {
-        System.out.println(optional.get());
             IndexEntry entry = optional.get();
             entry.getDocuments().add(id);
             repository.save(entry);
         } else {
-        System.out.println("|" + word + "|");
             IndexEntry newEntry = new IndexEntry(word);
             newEntry.getDocuments().add(id);
             repository.insert(newEntry);
